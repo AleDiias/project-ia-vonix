@@ -9,11 +9,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface Chat {
   id: string;
   title: string;
-  createdAt: Date;
+  created_at: string;
 }
 
 interface SidebarProps {
@@ -62,7 +64,7 @@ export function Sidebar({
                 <div className="flex flex-col items-start gap-1">
                   <span className="line-clamp-1">{chat.title}</span>
                   <span className="text-xs text-muted-foreground">
-                    {new Date(chat.createdAt).toLocaleDateString()}
+                    { format( new Date(chat. created_at ) , "dd 'de' MMMM", { locale: ptBR } )}
                   </span>
                 </div>
               </Button>
