@@ -22,6 +22,8 @@ export default function Index() {
     currentChatId,
     handleNewChat,
     handleSelectChat,
+    handleArchiveChat,
+    handleDeleteChat,
   } = useChat();
   
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -38,6 +40,8 @@ export default function Index() {
         chatHistory={chatHistory}
         onNewChat={handleNewChat}
         onSelectChat={handleSelectChat}
+        onArchiveChat={handleArchiveChat}
+        onDeleteChat={handleDeleteChat}
         currentChatId={currentChatId}
       />
 
@@ -55,7 +59,7 @@ export default function Index() {
                 )}
                 {!isRecording && (
                   <p className="text-sm text-muted-foreground">
-                    Faça uma pergunta a IA Vonix ou clique no microfone para falar
+                    Faça uma pergunta ou clique no microfone para falar
                   </p>
                 )}
               </div>
