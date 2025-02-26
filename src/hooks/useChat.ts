@@ -2,11 +2,12 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ChatMessage, sendChatMessage, textToSpeech } from "@/lib/api";
 import * as db from "@/lib/db";
+import { format } from "date-fns";
 
 interface Chat {
   id: string;
   title: string;
-  createdAt: Date;
+  created_at: string;
   archived: boolean;
 }
 
@@ -39,6 +40,10 @@ export function useChat() {
     }
   };
 
+  const generateTitle = (message: string) => {
+    return message.length > 50 ? `${message.slice(0, 47)}...` : message;
+  };
+
   const addMessage = useCallback(async (role: "user" | "assistant", content: string) => {
     if (!currentChatId) return;
 
@@ -62,6 +67,8 @@ export function useChat() {
       
       if (!currentChatId) {
         const newChat = await db.createChat(message);
+        const  title  =  generateTitle (message);         
+        const newChat = await db.createChat(title);
         setCurrentChatId(newChat.id);
         setChatHistory(prev => [newChat, ...prev]);
       }
