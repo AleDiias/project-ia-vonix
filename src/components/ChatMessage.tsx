@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 interface ChatMessageProps {
   message: MessageType;
-  onTextToSpeech: (text: string) => void;
+  onTextToSpeech?: (text: string) => void;
 }
 
 export function ChatMessage({ message, onTextToSpeech }: ChatMessageProps) {
@@ -23,12 +23,12 @@ export function ChatMessage({ message, onTextToSpeech }: ChatMessageProps) {
         className={cn(
           "relative flex max-w-[80%] flex-col gap-2 rounded-lg px-4 py-3 text-sm",
           isAI
-            ? "bg-chat-ai text-white"
-            : "bg-chat-user text-primary-foreground"
+            ? "bg-primary/10 text-foreground border border-primary/20"
+            : "bg-primary text-primary-foreground"
         )}
       >
         <p className="whitespace-pre-wrap break-words">{message.content}</p>
-        {isAI && (
+        {isAI && onTextToSpeech && (
           <Button
             variant="ghost"
             size="icon"

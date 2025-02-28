@@ -123,7 +123,11 @@ export function ChatInput({
             size="icon" 
             disabled={isLoading || (!message.trim() && !recordedAudio)}
           >
-            <SendHorizonal className="h-4 w-4" />
+            {isLoading ? (
+              <Pause className="h-4 w-4" />
+            ) : (
+              <SendHorizonal className="h-4 w-4" />
+            )}
           </Button>
         </div>
       </div>

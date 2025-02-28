@@ -62,6 +62,69 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          language: string
+          notifications_enabled: boolean
+          theme: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          language?: string
+          notifications_enabled?: boolean
+          theme?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          language?: string
+          notifications_enabled?: boolean
+          theme?: string
+        }
+        Relationships: []
+      }
+      user_devices: {
+        Row: {
+          browser: string
+          device_name: string
+          id: string
+          ip_address: string
+          is_current: boolean | null
+          last_active: string
+          user_id: string
+        }
+        Insert: {
+          browser: string
+          device_name: string
+          id?: string
+          ip_address: string
+          is_current?: boolean | null
+          last_active?: string
+          user_id: string
+        }
+        Update: {
+          browser?: string
+          device_name?: string
+          id?: string
+          ip_address?: string
+          is_current?: boolean | null
+          last_active?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

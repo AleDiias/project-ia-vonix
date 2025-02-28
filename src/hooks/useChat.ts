@@ -1,8 +1,10 @@
+
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ChatMessage, sendChatMessage, textToSpeech } from "@/lib/api";
 import * as db from "@/lib/db";
-import { format } from "date-fns";
+import { format, differenceInDays, isThisWeek, isThisMonth } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface Chat {
   id: string;
@@ -47,7 +49,7 @@ export function useChat() {
   const addMessage = useCallback(async (role: "user" | "assistant", content: string) => {
     if (!currentChatId) return;
 
-    const newMessage = { role, content };
+    const newMessage: ChatMessage = { role, content };
     setMessages(prev => [...prev, newMessage]);
     
     try {
@@ -66,16 +68,42 @@ export function useChat() {
       setIsLoading(true);
       
       if (!currentChatId) {
-        const newChat = await db.createChat(message);
-        const  title  =  generateTitle (message);         
+        // Criar novo chat
+        const title = generateTitle(message);
         const newChat = await db.createChat(title);
         setCurrentChatId(newChat.id);
         setChatHistory(prev => [newChat, ...prev]);
+        
+        // Adicionar mensagem do usuário ao estado antes de enviar para a API
+        const userMessage: ChatMessage = { role: "user", content: message };
+        setMessages([userMessage]);
+        
+        // Salvar mensagem no banco de dados
+        await db.saveMessage(newChat.id, userMessage);
+        
+        // Enviar para a API e obter resposta
+        const response = await sendChatMessage(message);
+        
+        // Adicionar resposta ao estado e salvar no banco
+        const assistantMessage: ChatMessage = { role: "assistant", content: response };
+        setMessages(prev => [...prev, assistantMessage]);
+        await db.saveMessage(newChat.id, assistantMessage);
+      } else {
+        // Adicionar mensagem do usuário ao estado
+        const userMessage: ChatMessage = { role: "user", content: message };
+        setMessages(prev => [...prev, userMessage]);
+        
+        // Salvar mensagem no banco de dados
+        await db.saveMessage(currentChatId, userMessage);
+        
+        // Enviar para a API e obter resposta
+        const response = await sendChatMessage(message);
+        
+        // Adicionar resposta ao estado e salvar no banco
+        const assistantMessage: ChatMessage = { role: "assistant", content: response };
+        setMessages(prev => [...prev, assistantMessage]);
+        await db.saveMessage(currentChatId, assistantMessage);
       }
-      
-      await addMessage("user", message);
-      const response = await sendChatMessage(message);
-      await addMessage("assistant", response);
     } catch (error) {
       toast({
         title: "Erro",
@@ -85,7 +113,29 @@ export function useChat() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentChatId, addMessage, toast]);
+  }, [currentChatId, toast]);
+
+  const handleSelectChat = useCallback(async (id: string) => {
+    try {
+      const messages = await db.getChatMessages(id);
+      setMessages(messages.map(msg => ({
+        role: msg.role as "user" | "assistant",
+        content: msg.content
+      })));
+      setCurrentChatId(id);
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Falha ao carregar conversa.",
+        variant: "destructive",
+      });
+    }
+  }, []);
+
+  const handleNewChat = useCallback(async () => {
+    setCurrentChatId(null);
+    setMessages([]);
+  }, []);
 
   const handleTextToSpeech = useCallback(async (text: string) => {
     try {
@@ -153,35 +203,6 @@ export function useChat() {
       });
     }
   }, [isRecording, toast]);
-
-  const handleNewChat = useCallback(async () => {
-    try {
-      const newChat = await db.createChat("Nova conversa");
-      setChatHistory(prev => [newChat, ...prev]);
-      setCurrentChatId(newChat.id);
-      setMessages([]);
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Falha ao criar nova conversa.",
-        variant: "destructive",
-      });
-    }
-  }, [toast]);
-
-  const handleSelectChat = useCallback(async (id: string) => {
-    try {
-      const messages = await db.getChatMessages(id);
-      setMessages(messages);
-      setCurrentChatId(id);
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Falha ao carregar conversa.",
-        variant: "destructive",
-      });
-    }
-  }, []);
 
   const handleArchiveChat = useCallback(async (id: string) => {
     try {

@@ -27,7 +27,7 @@ export async function getChatHistory() {
 export async function getChatMessages(chatId: string) {
   const { data, error } = await supabase
     .from('messages')
-    .select('*')
+    .select('role, content, created_at')
     .eq('chat_id', chatId)
     .order('created_at', { ascending: true });
 

@@ -1,9 +1,9 @@
-
 const API_BASE_URL = "http://192.168.11.14:7501";
 
 export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
+  created_at?: string;
 }
 
 export async function sendChatMessage(message: string): Promise<string> {
